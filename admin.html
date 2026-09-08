@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal - MySkill Residence</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        body {
+            background-color: #f4f7f6;
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- SECTION LOGIN -->
+    <div id="loginSection" class="container mt-5 pt-5" style="max-width: 400px;">
+        <div class="card p-4 text-center">
+            <h3 class="mb-4" style="color: #0097a7;">Admin Login</h3>
+            <div class="form-group mb-3">
+                <input type="text" id="username" class="form-control" placeholder="Username (ketik: admin)">
+            </div>
+            <div class="form-group mb-4">
+                <input type="password" id="password" class="form-control" placeholder="Password (ketik: 1234)">
+            </div>
+            <button onclick="login()" class="btn w-100 text-white" style="background-color: #0097a7;">Masuk
+                Dashboard</button>
+            <p id="loginError" class="text-danger mt-2" style="display: none; font-size: 14px;">Username/Password salah!
+            </p>
+        </div>
+    </div>
+
+    <!-- SECTION DASHBOARD (Sembunyi sebelum login) -->
+    <div id="dashboardSection" class="container-fluid p-4" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Dashboard Manajemen Properti</h2>
+            <div>
+                <a href="index.html" target="_blank" class="btn btn-outline-secondary me-2">Lihat Website</a>
+                <button onclick="logout()" class="btn btn-danger">Logout</button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card p-4">
+                    <h5>Tambah Rumah Baru</h5>
+                    <hr>
+                    <form id="addHouseForm">
+                        <input type="text" id="inTipe" class="form-control mb-2" placeholder="Kode Tipe (Contoh: E)"
+                            required>
+                        <input type="text" id="inNama" class="form-control mb-2" placeholder="Nama Rumah" required>
+                        <input type="text" id="inHarga" class="form-control mb-2" placeholder="Harga (Contoh: 1M-an)"
+                            required>
+                        <div class="row">
+                            <div class="col-6"><input type="number" id="inKamarMandi" class="form-control mb-2"
+                                    placeholder="Jml K.Mandi" required></div>
+                            <div class="col-6"><input type="number" id="inKamarTidur" class="form-control mb-2"
+                                    placeholder="Jml K.Tidur" required></div>
+                            <div class="col-6"><input type="number" id="inLuasB" class="form-control mb-2"
+                                    placeholder="Luas B (m2)" required></div>
+                            <div class="col-6"><input type="number" id="inLuasT" class="form-control mb-2"
+                                    placeholder="Luas T (m2)" required></div>
+                        </div>
+                        <textarea id="inDeskripsi" class="form-control mb-3" rows="3" placeholder="Deskripsi Singkat"
+                            required></textarea>
+                        <button type="submit" class="btn text-white w-100" style="background-color: #0097a7;">Simpan
+                            Properti</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="card p-4">
+                    <h5>Daftar Properti Aktif</h5>
+                    <hr>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Tipe</th>
+                                    <th>Nama</th>
+                                    <th>Harga</th>
+                                    <th>Spek (KM/KT)</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function login() {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+
+            if (user === 'admin' && pass === '1234') {
+                sessionStorage.setItem('isLoggedIn', 'true');
+                checkAuth();
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem('isLoggedIn');
+            checkAuth();
+        }
+
+        function checkAuth() {
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+            if (isLoggedIn === 'true') {
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('dashboardSection').style.display = 'block';
+                renderTable();
+            } else {
+                document.getElementById('loginSection').style.display = 'block';
+                document.getElementById('dashboardSection').style.display = 'none';
+            }
+        }
+
+        checkAuth();
+
+        function renderTable() {
+            const db = JSON.parse(localStorage.getItem('db_rumah')) || [];
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            db.forEach((item, index) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${item.tipe}</strong></td>
+                        <td>${item.nama}</td>
+                        <td>${item.harga}</td>
+                        <td><i class="fa fa-shower"></i> ${item.kamar_mandi} | <i class="fa fa-bed"></i> ${item.kamar_tidur}</td>
+                        <td>
+                            <button onclick="deleteHouse(${index})" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i> Hapus</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        document.getElementById('addHouseForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const newHouse = {
+                tipe: document.getElementById('inTipe').value.toUpperCase(),
+                nama: document.getElementById('inNama').value,
+                harga: document.getElementById('inHarga').value,
+                kamar_mandi: document.getElementById('inKamarMandi').value,
+                kamar_tidur: document.getElementById('inKamarTidur').value,
+                luas_bangunan: document.getElementById('inLuasB').value,
+                luas_tanah: document.getElementById('inLuasT').value,
+                deskripsi: document.getElementById('inDeskripsi').value,
+                gambar_rumah: "./img/house-1.png",
+                carport: "1",
+                denah_rumah: "./img/denah_rumah.jpg"
+            };
+
+            const db = JSON.parse(localStorage.getItem('db_rumah')) || [];
+            db.push(newHouse);
+            localStorage.setItem('db_rumah', JSON.stringify(db));
+
+            this.reset();
+            renderTable();
+            alert("Properti berhasil ditambahkan! Silakan cek website utama.");
+        });
+
+        function deleteHouse(index) {
+            if (confirm("Yakin ingin menghapus properti ini?")) {
+                const db = JSON.parse(localStorage.getItem('db_rumah')) || [];
+                db.splice(index, 1);
+                localStorage.setItem('db_rumah', JSON.stringify(db));
+                renderTable();
+            }
+        }
+    </script>
+</body>
+
+</html>

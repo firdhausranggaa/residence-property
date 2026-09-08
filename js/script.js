@@ -134,107 +134,82 @@ window.addEventListener("scroll", (e) => {
     }
 });
 
+const defaultRumahData = [
+    {
+        tipe: "A", gambar_rumah: "./img/house-1.png", nama: "Casa Verde",
+        luas_bangunan: 120, luas_tanah: 200, kamar_mandi: 2, kamar_tidur: 3,
+        deskripsi: "Casa Verde, rumah dengan desain modern dan luas tanah yang cukup untuk kehidupan keluarga.",
+        harga: "700Jt-an", carport: "1", denah_rumah: "./img/denah_rumah.jpg",
+    },
+    {
+        tipe: "B", gambar_rumah: "./img/house-2.png", nama: "Sky Villa",
+        luas_bangunan: 180, luas_tanah: 250, kamar_mandi: 3, kamar_tidur: 4,
+        deskripsi: "Sky Villa, rumah mewah dengan pemandangan yang menakjubkan.",
+        harga: "800Jt-an", carport: "1", denah_rumah: "./img/denah_rumah.jpg",
+    }
+];
+
+let savedRumahData = JSON.parse(localStorage.getItem('db_rumah'));
+
+if (!savedRumahData || savedRumahData.length === 0) {
+    localStorage.setItem('db_rumah', JSON.stringify(defaultRumahData));
+    savedRumahData = defaultRumahData;
+}
+
 const jsonData = {
-    rumah: [
-        {
-            tipe: "A",
-            gambar_rumah: "./img/house-1.png",
-            nama: "Casa Verde",
-            luas_bangunan: 120,
-            luas_tanah: 200,
-            kamar_mandi: 2,
-            kamar_tidur: 3,
-            deskripsi:
-                "Casa Verde, rumah dengan desain modern dan luas tanah yang cukup untuk kehidupan keluarga. Dengan dua kamar mandi dan tiga kamar tidur, rumah ini memberikan kenyamanan dan kehangatan bagi keluarga Anda.",
-            harga: "700Jt-an",
-            carport: "1",
-            denah_rumah: "./img/denah_rumah.jpg",
-        },
-        {
-            tipe: "B",
-            gambar_rumah: "./img/house-2.png",
-            nama: "Sky Villa",
-            luas_bangunan: 180,
-            luas_tanah: 250,
-            kamar_mandi: 3,
-            kamar_tidur: 4,
-            deskripsi:
-                "Sky Villa, rumah mewah dengan pemandangan yang menakjubkan. Dengan tiga kamar mandi dan empat kamar tidur, ini adalah tempat yang sempurna untuk hidup bergaya dan bersantai di atas langit biru.",
-            harga: "800Jt-an",
-            carport: "1",
-            denah_rumah: "./img/denah_rumah.jpg",
-        },
-        {
-            tipe: "C",
-            gambar_rumah: "./img/house-3.png",
-            nama: "Lakeview Mansion",
-            luas_bangunan: 220,
-            luas_tanah: 300,
-            kamar_mandi: 4,
-            kamar_tidur: 5,
-            deskripsi:
-                "Lakeview Mansion, rumah megah dengan pemandangan danau yang menakjubkan. Dengan empat kamar mandi dan lima kamar tidur, rumah ini menghadirkan keanggunan dan kenyamanan untuk gaya hidup bergengsi.",
-            harga: "900Jt-an",
-            carport: "1",
-            denah_rumah: "./img/denah_rumah.jpg",
-        },
-        {
-            tipe: "D",
-            gambar_rumah: "./img/house-4.png",
-            nama: "Garden Retreat",
-            luas_bangunan: 150,
-            luas_tanah: 180,
-            kamar_mandi: 2,
-            kamar_tidur: 3,
-            deskripsi:
-                "Garden Retreat, rumah elegan dengan taman yang indah. Dua kamar mandi dan tiga kamar tidur memberikan keseimbangan sempurna antara keindahan alam dan kenyamanan rumah modern.",
-            harga: "950Jt-an",
-            carport: "1",
-            denah_rumah: "./img/denah_rumah.jpg",
-        },
-    ],
+    rumah: savedRumahData
 };
 
 function createHouseCard(house, index, isMobileView) {
-    const isOdd = index % 2 === 1;
+    const isFavorited = checkFavorite(house.tipe);
+    const heartClass = isFavorited ? 'fa-heart' : 'fa-heart-o';
+    const heartColor = isFavorited ? '#dc3545' : 'var(--primary-color)';
 
     const penjelasan = `
       <div class="col-md-6 mt-4 mb-4">
         <h2>${house.nama}</h2>
         <p>${house.deskripsi}</p>
         <div class="row">
-          <div class="col-md-5 mb-3">
-            <div class="card justify-content-center align-self-center  p-3 tipe_rumah_item">
-              <i class="fa fa-briefcase"></i>
-              <h3>${house.luas_bangunan}</h3>
-              <p>Luas Bangunan</p>
+            <!-- (Bagian spesifikasi luasan dan kamar biarkan sama seperti aslinya) -->
+            <div class="col-md-5 mb-3">
+              <div class="card justify-content-center align-self-center p-3 tipe_rumah_item">
+                <i class="fa fa-briefcase"></i>
+                <h3>${house.luas_bangunan}</h3>
+                <p>Luas Bangunan</p>
+              </div>
             </div>
-          </div>
-          <div class="col-md-5 mb-3">
-            <div class="card justify-content-center align-self-center  p-3 tipe_rumah_item">
-              <i class="fa fa-briefcase"></i>
-              <h3>${house.luas_tanah}</h3>
-              <p>Luas Tanah</p>
+            <div class="col-md-5 mb-3">
+              <div class="card justify-content-center align-self-center p-3 tipe_rumah_item">
+                <i class="fa fa-briefcase"></i>
+                <h3>${house.luas_tanah}</h3>
+                <p>Luas Tanah</p>
+              </div>
             </div>
-          </div>
-          <div class="col-md-5 mb-3">
-            <div class="card justify-content-center align-self-center  p-3 tipe_rumah_item">
-              <i class="fa fa-shower"></i>
-              <h3>${house.kamar_mandi}</h3>
-              <p>Kamar Mandi</p>
+            <div class="col-md-5 mb-3">
+              <div class="card justify-content-center align-self-center p-3 tipe_rumah_item">
+                <i class="fa fa-shower"></i>
+                <h3>${house.kamar_mandi}</h3>
+                <p>Kamar Mandi</p>
+              </div>
             </div>
-          </div>
-          <div class="col-md-5 mb-3">
-          <div class="card justify-content-center align-self-center  p-3 tipe_rumah_item">
-            <i class="fa fa-bed"></i>
-            <h3>${house.kamar_tidur}</h3>
-            <p>Kamar Tidur</p>
-          </div>
+            <div class="col-md-5 mb-3">
+              <div class="card justify-content-center align-self-center p-3 tipe_rumah_item">
+                <i class="fa fa-bed"></i>
+                <h3>${house.kamar_tidur}</h3>
+                <p>Kamar Tidur</p>
+              </div>
+            </div>
         </div>
+        
+        <div class="d-flex align-items-center mt-2">
+            <a href="./detail_rumah.html?tipe_rumah=${house.tipe}" class="btn_home view_more_btn" style="text-decoration:none;">
+                Selengkapnya
+            </a>
+            <!-- Tombol Favorit -->
+            <button onclick="toggleFavorite('${house.tipe}')" style="width: 55px; height: 55px; border-radius: 7px; border: 1px solid var(--primary-color); background: transparent; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.3s;">
+                <i class="fa ${heartClass} fa-lg fav-icon-${house.tipe}" style="color: ${heartColor}; transition: 0.3s;"></i>
+            </button>
         </div>
-        <a href="./detail_rumah.html?tipe_rumah=${house.tipe}" class="btn_home view_more_btn mt-1" style="text-decoration:none;">
-            Selengkapnya
-        </a>
       </div>
     `;
 
@@ -557,3 +532,31 @@ menuLinks.forEach(link => {
         link.classList.add("menu_active");
     }
 });
+
+function checkFavorite(tipe) {
+    let favorites = JSON.parse(localStorage.getItem('fav_rumah')) || [];
+    return favorites.includes(tipe);
+}
+
+function toggleFavorite(tipe) {
+    let favorites = JSON.parse(localStorage.getItem('fav_rumah')) || [];
+    const icons = document.querySelectorAll(`.fav-icon-${tipe}`);
+
+    if (favorites.includes(tipe)) {
+        favorites = favorites.filter(fav => fav !== tipe);
+        icons.forEach(icon => {
+            icon.classList.remove('fa-heart');
+            icon.classList.add('fa-heart-o');
+            icon.style.color = 'var(--primary-color)';
+        });
+    } else {
+        favorites.push(tipe);
+        icons.forEach(icon => {
+            icon.classList.remove('fa-heart-o');
+            icon.classList.add('fa-heart');
+            icon.style.color = '#dc3545';
+        });
+    }
+
+    localStorage.setItem('fav_rumah', JSON.stringify(favorites));
+}
