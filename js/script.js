@@ -161,6 +161,8 @@ const jsonData = {
 };
 
 function createHouseCard(house, index, isMobileView) {
+    const isOdd = index % 2 === 1;
+
     const isFavorited = checkFavorite(house.tipe);
     const heartClass = isFavorited ? 'fa-heart' : 'fa-heart-o';
     const heartColor = isFavorited ? '#dc3545' : 'var(--primary-color)';
